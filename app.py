@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import logging
 from flask import Flask, request, jsonify
@@ -10,6 +11,8 @@ from langchain_community.llms import OpenAI
 from langchain.chains.question_answering import load_qa_chain
 import os
 import io
+import signal
+import sys
 
 app = Flask(__name__)
 load_dotenv()
@@ -73,6 +76,18 @@ def ask():
     logging.info("Question answered successfully")
     return jsonify({'answer': response})
 
+
+def signal_handler(sig, frame):
+    print('Terminating Python process...')
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, signal_handler)
+
+async def run_app():
+    loop = asyncio.get_event_loop()
+    server = await loop.run_in_executor(None, app.run, 'localhost', 5000)
+    return server
+
 if __name__ == '__main__':
     logging.info("Starting Flask app")
-    app.run(port=5000)
+    asyncio.run(run_app())

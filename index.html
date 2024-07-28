@@ -74,7 +74,14 @@
 
         async function askQuestion(question) {
             console.log("Asking question...");
-            appDiv.innerHTML = `<p>Processing your question...</p>`;
+            appDiv.innerHTML = `<p>Processing your question<span id="dots">...</span></p>`;
+            const dotsElement = document.getElementById('dots');
+            let dotCount = 0;
+            const interval = setInterval(() => {
+                dotCount = (dotCount + 1) % 4;
+                dotsElement.textContent = '.'.repeat(dotCount);
+            }, 500);
+
             const response = await fetch('http://localhost:5000/ask', {
                 method: 'POST',
                 headers: {
@@ -87,6 +94,7 @@
 
             const data = await response.json();
             console.log("Ask response:", data);
+            clearInterval(interval);
             appDiv.innerHTML = `<p>Answer: ${data.answer}</p>`;
         }
 

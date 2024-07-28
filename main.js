@@ -4,6 +4,7 @@ const { spawn } = require('child_process');
 
 let mainWindow;
 let pythonProcess;
+let isPythonProcessTerminated = false;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -19,7 +20,9 @@ function createWindow() {
 
     mainWindow.on('closed', function () {
         mainWindow = null;
+        terminatePythonProcess('mainWindow closed event');
     });
+
     // Create the application menu
     const menu = Menu.buildFromTemplate([
         {
@@ -78,6 +81,17 @@ function createWindow() {
     Menu.setApplicationMenu(menu);
 }
 
+function terminatePythonProcess(event) {
+    if (pythonProcess && !isPythonProcessTerminated) {
+        console.log(`Terminating Python process from ${event}...`);
+        pythonProcess.kill('SIGTERM');
+        pythonProcess.on('close', () => {
+            console.log('Python process killed successfully');
+            isPythonProcessTerminated = true;
+        });
+    }
+}
+
 app.on('ready', () => {
     pythonProcess = spawn('python', ['app.py']);
 
@@ -90,7 +104,17 @@ app.on('ready', () => {
     });
 
     pythonProcess.on('close', (code) => {
-        console.log(`child process exited with code ${code}`);
+        if (code === null) {
+            console.error('Python process exited with error code: null');
+        } else {
+            console.log(`child process exited with code ${code}`);
+            if (code !== 0) {
+                console.error(`Python process exited with error code: ${code}`);
+            } else {
+                console.log('Python process terminated successfully');
+            }
+        }
+        isPythonProcessTerminated = true;
     });
 
     createWindow();
@@ -108,8 +132,11 @@ app.on('activate', function () {
     }
 });
 
-app.on('quit', () => {
-    if (pythonProcess) {
-        pythonProcess.kill('SIGTERM');
+app.on('before-quit', async (event) => {
+    event.preventDefault();
+    terminatePythonProcess('before-quit event');
+    while (!isPythonProcessTerminated) {
+        await new Promise(resolve => setTimeout(resolve, 100));
     }
+    app.exit();
 });
