@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
 
 function createWindow() {
@@ -12,6 +12,63 @@ function createWindow() {
     });
 
     mainWindow.loadFile('index.html');
+
+    // Create the application menu
+    const menu = Menu.buildFromTemplate([
+        {
+            label: 'File',
+            submenu: [
+                {
+                    label: 'Home',
+                    click: () => {
+                        mainWindow.loadFile('index.html');
+                    }
+                },
+                {
+                    label: 'Settings',
+                    click: () => {
+                        mainWindow.loadFile('settings.html');
+                    }
+                },
+                { type: 'separator' },
+                {
+                    label: 'Exit',
+                    click: () => {
+                        app.quit();
+                    }
+                }
+            ]
+        },
+        {
+            label: 'Edit',
+            submenu: [
+                { role: 'undo' },
+                { role: 'redo' },
+                { type: 'separator' },
+                { role: 'cut' },
+                { role: 'copy' },
+                { role: 'paste' },
+                { role: 'delete' },
+                { role: 'selectAll' }
+            ]
+        },
+        {
+            label: 'View',
+            submenu: [
+                { role: 'reload' },
+                { role: 'forceReload' },
+                { role: 'toggleDevTools' },
+                { type: 'separator' },
+                { role: 'resetZoom' },
+                { role: 'zoomIn' },
+                { role: 'zoomOut' },
+                { type: 'separator' },
+                { role: 'togglefullscreen' }
+            ]
+        }
+    ]);
+
+    Menu.setApplicationMenu(menu);
 }
 
 app.on('ready', createWindow);

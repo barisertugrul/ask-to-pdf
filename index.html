@@ -8,25 +8,30 @@
             display: inline-block;
             vertical-align: middle;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
 <h1 class="text-2xl font-bold">Ask To PDF App</h1>
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" id="bubble" fill="white">
-    <path d="M6 45.414V36H3c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h42c1.654 0 3-1.346 3 3v26c0 1.654-1.346 3-3 3H15.414L6 45.414zM3 6a1 1 0 0 0-1 1v26a1 1 0 0 0 1 1h5v6.586L14.586 34H45a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H3z"></path>
+    <path d="M6 45.414V36H3c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h42c1.654 0 3 1.346 3 3v26c0 1.654-1.346 3-3 3H15.414L6 45.414zM3 6a1 1 0 0 0-1 1v26a1 1 0 0 0 1 1h5v6.586L14.586 34H45a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H3z"></path>
     <circle cx="16" cy="20" r="2"></circle>
     <circle cx="32" cy="20" r="2"></circle>
     <circle cx="24" cy="20" r="2"></circle>
 </svg>
 <div class="mt-4">
     <label for="apiKey" class="block text-sm font-medium text-gray-700">API Key:</label>
-    <input type="text" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    <label for="apiKey" class="block text-sm font-medium text-gray-700">Set API Key in File->Settings</label>
+    <input type="hidden" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
 </div>
 <div class="mt-4">
     <label for="pdfFile" class="block text-sm font-medium text-gray-700">PDF File:</label>
     <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
 </div>
-<button id="upload" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Upload</button>
+<div id="loading" class="mt-4 hidden">Loading...</div>
+<div id="success" class="mt-4 hidden">File uploaded and processed successfully!</div>
 <div class="mt-4">
     <label for="question" class="block text-sm font-medium text-gray-700">Question:</label>
     <input type="text" id="question" name="question" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -35,8 +40,17 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const appDiv = document.getElementById('app');
-        const uploadButton = document.getElementById('upload');
+        const pdfFileInput = document.getElementById('pdfFile');
         const questionInput = document.getElementById('question');
+        const loadingDiv = document.getElementById('loading');
+        const successDiv = document.getElementById('success');
+
+        // Load API key from local storage
+        const apiKeyInput = document.getElementById('apiKey');
+        const savedApiKey = localStorage.getItem('api_key');
+        if (savedApiKey) {
+            apiKeyInput.value = savedApiKey;
+        }
 
         async function uploadData(apiKey, pdfContent) {
             console.log("Uploading data...");
@@ -53,11 +67,14 @@
 
             const data = await response.json();
             console.log("Upload response:", data);
-            appDiv.innerHTML = `<p>${data.message}</p>`;
+            loadingDiv.classList.add('hidden');
+            successDiv.innerHTML = `<p>${data.message}</p>`;
+            successDiv.classList.remove('hidden');
         }
 
         async function askQuestion(question) {
             console.log("Asking question...");
+            appDiv.innerHTML = `<p>Processing your question...</p>`;
             const response = await fetch('http://localhost:5000/ask', {
                 method: 'POST',
                 headers: {
@@ -73,11 +90,13 @@
             appDiv.innerHTML = `<p>Answer: ${data.answer}</p>`;
         }
 
-        uploadButton.addEventListener('click', () => {
+        pdfFileInput.addEventListener('change', () => {
             const apiKey = document.getElementById('apiKey').value;
-            const pdfFile = document.getElementById('pdfFile').files[0];
+            const pdfFile = pdfFileInput.files[0];
 
             if (pdfFile) {
+                loadingDiv.classList.remove('hidden');
+                successDiv.classList.add('hidden');
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const pdfContent = event.target.result.split(',')[1]; // Get base64 string

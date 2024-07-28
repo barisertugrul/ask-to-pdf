@@ -52,7 +52,7 @@ def upload():
     knowledge_base = FAISS.from_texts(chunks, embeddings)
 
     logging.info("PDF content and API key uploaded successfully")
-    return jsonify({'message': 'PDF content and API key uploaded successfully'})
+    return jsonify({'message': 'File uploaded and processed successfully!'})
 
 @app.route('/ask', methods=['POST'])
 def ask():
