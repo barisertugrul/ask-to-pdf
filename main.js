@@ -1,8 +1,12 @@
 const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
+const { spawn } = require('child_process');
+
+let mainWindow;
+let pythonProcess;
 
 function createWindow() {
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         icon: path.join(__dirname, 'assets/img/icon-white.png'), // Set the application icon
@@ -13,6 +17,9 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
 
+    mainWindow.on('closed', function () {
+        mainWindow = null;
+    });
     // Create the application menu
     const menu = Menu.buildFromTemplate([
         {
@@ -71,16 +78,38 @@ function createWindow() {
     Menu.setApplicationMenu(menu);
 }
 
-app.on('ready', createWindow);
+app.on('ready', () => {
+    pythonProcess = spawn('python', ['app.py']);
 
-app.on('window-all-closed', () => {
+    pythonProcess.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
+
+    pythonProcess.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+    });
+
+    createWindow();
+});
+
+app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
 
-app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+app.on('activate', function () {
+    if (mainWindow === null) {
         createWindow();
+    }
+});
+
+app.on('quit', () => {
+    if (pythonProcess) {
+        pythonProcess.kill('SIGTERM');
     }
 });

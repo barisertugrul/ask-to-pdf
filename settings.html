@@ -7,6 +7,12 @@
         nav {
             margin-bottom: 1rem;
         }
+        .eye-icon {
+            cursor: pointer;
+            right: 20px;
+            transform: translateY(-135%);
+            position: absolute;
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-4">
@@ -16,13 +22,27 @@
 <h1 class="text-2xl font-bold">Settings</h1>
 <div class="mt-4">
     <label for="apiKey" class="block text-sm font-medium text-gray-700">API Key:</label>
-    <input type="text" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+    <div class="flex justify-items-stretch">
+        <input type="password" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        <span id="toggleApiKey" class="eye-icon">
+            👁️
+        </span>
+    </div>
 </div>
-<button id="save" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+<div class="flex justify-end space-x-2 mt-4 w-full">
+    <button id="close" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Close</button>
+    <button id="save" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+</div>
+
+
+
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const apiKeyInput = document.getElementById('apiKey');
+        const toggleApiKey = document.getElementById('toggleApiKey');
         const saveButton = document.getElementById('save');
+        const closeButton = document.getElementById('close');
 
         // Load saved API key from local storage
         const savedApiKey = localStorage.getItem('api_key');
@@ -30,11 +50,27 @@
             apiKeyInput.value = savedApiKey;
         }
 
+        // Toggle API key visibility
+        toggleApiKey.addEventListener('click', () => {
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                toggleApiKey.textContent = '🙈';
+            } else {
+                apiKeyInput.type = 'password';
+                toggleApiKey.textContent = '👁️';
+            }
+        });
+
         // Save API key to local storage
         saveButton.addEventListener('click', () => {
             const apiKey = apiKeyInput.value;
             localStorage.setItem('api_key', apiKey);
             alert('API Key saved successfully!');
+        });
+
+        // Redirect to index.html on close button click
+        closeButton.addEventListener('click', () => {
+            window.location.href = 'index.html';
         });
     });
 </script>

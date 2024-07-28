@@ -51,7 +51,7 @@ def upload():
     embeddings = OpenAIEmbeddings(api_key=api_key)
     knowledge_base = FAISS.from_texts(chunks, embeddings)
 
-    logging.info("PDF content and API key uploaded successfully")
+    logging.info("File uploaded and processed successfully!")
     return jsonify({'message': 'File uploaded and processed successfully!'})
 
 @app.route('/ask', methods=['POST'])

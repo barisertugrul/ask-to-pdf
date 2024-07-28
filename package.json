@@ -4,7 +4,7 @@
   "description": "This application allows users to upload a PDF and ask questions about its content using OpenAI's language model.",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "concurrently \"electron .\" \"python app.py\"",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
@@ -15,8 +15,8 @@
   "author": "",
   "license": "ISC",
   "build": {
-    "appId": "com.yourapp.id",
-    "productName": "YourAppName",
+    "appId": "com.ertyazilim.asktopdf",
+    "productName": "Ask To PDF",
     "files": [
       "dist/**/*",
       "main.js",
@@ -44,11 +44,12 @@
     "tailwindcss": "^3.4.7"
   },
   "dependencies": {
+    "concurrently": "^8.2.2",
     "dotenv": "^16.0.0",
     "express": "^4.17.1",
     "flask": "^2.0.0",
-    "pypdf2": "^1.26.0",
     "langchain": "^0.0.1",
-    "openai": "^0.0.1"
+    "openai": "^0.0.1",
+    "pypdf2": "^1.26.0"
   }
 }
