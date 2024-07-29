@@ -1,16 +1,76 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, session, shell } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
+const { spawn, execFile, exec } = require('child_process');
+const fs = require('fs');
+const kill = require('tree-kill');
 
 let mainWindow;
 let pythonProcess;
 let isPythonProcessTerminated = false;
 
+function runPython() {
+    return new Promise((resolve, reject) => {
+        pythonProcess = execFile(
+            path.join(__dirname, "app.exe"),
+            [],
+            {
+                windowsHide: true,
+                shell: true,
+            },
+            (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+            }
+        );
+
+        setTimeout(function() {
+            resolve();
+        }, 1000);
+    });
+}
+
+function killPython() {
+    if (pythonProcess) {
+        kill(pythonProcess.pid, 'SIGTERM', (err) => {
+            if (err) {
+                console.error('Failed to kill Python process:', err);
+            } else {
+                console.log('Python process killed successfully');
+                isPythonProcessTerminated = true;
+            }
+        });
+    }
+}
+
+function checkAndKillOldApp() {
+    return new Promise((resolve, reject) => {
+        exec('tasklist', (err, stdout, stderr) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (stdout.toLowerCase().indexOf('ask-to-pdf.exe') > -1) {
+                    exec('taskkill /IM ask-to-pdf.exe /F', (err, stdout, stderr) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            console.log('Old application terminated successfully');
+                            resolve();
+                        }
+                    });
+                } else {
+                    resolve();
+                }
+            }
+        });
+    });
+}
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
-        icon: path.join(__dirname, 'assets/img/icon-white.png'), // Set the application icon
+        icon: path.join(__dirname, 'assets/img/icon-white.png'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
         },
@@ -20,10 +80,9 @@ function createWindow() {
 
     mainWindow.on('closed', function () {
         mainWindow = null;
-        terminatePythonProcess('mainWindow closed event');
+        killPython();
     });
 
-    // Create the application menu
     const menu = Menu.buildFromTemplate([
         {
             label: 'File',
@@ -75,52 +134,44 @@ function createWindow() {
                 { type: 'separator' },
                 { role: 'togglefullscreen' }
             ]
+        },
+        {
+            label: 'GitHub Repo',
+            click: () => {
+                shell.openExternal('https://github.com/barisertugrul/ask-to-pdf')
+            }
+        },
+        {
+            label: 'Website',
+            click: () => {
+                shell.openExternal('http://www.barisertugrul.com')
+            }
         }
     ]);
 
     Menu.setApplicationMenu(menu);
 }
 
-function terminatePythonProcess(event) {
-    if (pythonProcess && !isPythonProcessTerminated) {
-        console.log(`Terminating Python process from ${event}...`);
-        pythonProcess.kill('SIGTERM');
-        pythonProcess.on('close', () => {
-            console.log('Python process killed successfully');
-            isPythonProcessTerminated = true;
-        });
-    }
-}
-
 app.on('ready', () => {
-    pythonProcess = spawn('python', ['app.py']);
-
-    pythonProcess.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
+    session.defaultSession.clearCache().then(() => {
+        console.log('Cache temizlendi.');
+    }).catch((error) => {
+        console.error('Cache temizlenirken hata oluştu:', error);
     });
 
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`stderr: ${data}`);
+    checkAndKillOldApp().then(() => {
+        runPython().then(() => {
+            createWindow();
+        }).catch(error => {
+            console.log(error);
+        });
+    }).catch(error => {
+        console.error('Failed to terminate old application:', error);
     });
-
-    pythonProcess.on('close', (code) => {
-        if (code === null) {
-            console.error('Python process exited with error code: null');
-        } else {
-            console.log(`child process exited with code ${code}`);
-            if (code !== 0) {
-                console.error(`Python process exited with error code: ${code}`);
-            } else {
-                console.log('Python process terminated successfully');
-            }
-        }
-        isPythonProcessTerminated = true;
-    });
-
-    createWindow();
 });
 
 app.on('window-all-closed', function () {
+    killPython();
     if (process.platform !== 'darwin') {
         app.quit();
     }
@@ -134,7 +185,7 @@ app.on('activate', function () {
 
 app.on('before-quit', async (event) => {
     event.preventDefault();
-    terminatePythonProcess('before-quit event');
+    killPython();
     while (!isPythonProcessTerminated) {
         await new Promise(resolve => setTimeout(resolve, 100));
     }

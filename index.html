@@ -2,8 +2,9 @@
 <html>
 <head>
     <title>Ask To PDF App</title>
-    <link href="dist/styles.css" rel="stylesheet">
+    <link href="assets/css/styles.css" rel="stylesheet">
     <style>
+
         h1, svg {
             display: inline-block;
             vertical-align: middle;
@@ -14,16 +15,24 @@
     </style>
 </head>
 <body class="bg-gray-100 p-4">
-<h1 class="text-2xl font-bold">Ask To PDF App</h1>
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" id="bubble" fill="white">
+<h1 class="text-2xl font-bold mr-2.5">Ask To PDF App</h1>
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" id="bubble">
     <path d="M6 45.414V36H3c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3h42c1.654 0 3 1.346 3 3v26c0 1.654-1.346 3-3 3H15.414L6 45.414zM3 6a1 1 0 0 0-1 1v26a1 1 0 0 0 1 1h5v6.586L14.586 34H45a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H3z"></path>
     <circle cx="16" cy="20" r="2"></circle>
     <circle cx="32" cy="20" r="2"></circle>
     <circle cx="24" cy="20" r="2"></circle>
 </svg>
+<div class="bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 shadow-md" role="alert">
+    <div class="flex">
+        <div class="py-1"><svg class="fill-current h-6 w-6 text-teal-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
+        <div>
+            <p class="font-bold">Set OpenAI API Key</p>
+            <p class="text-sm">To use the application, you should get an OpenAI Api Key. After starting Openai membership, you can create an api key in your openai member panel. Go to <a href="settings.html" class="mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">File->Settings</a> to save the key.</p>
+
+        </div>
+    </div>
+</div>
 <div class="mt-4">
-    <label for="apiKey" class="block text-sm font-medium text-gray-700">API Key:</label>
-    <label for="apiKey" class="block text-sm font-medium text-gray-700">Set API Key in <a href="settings.html" class="mt-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">File->Settings</a></label>
     <input type="hidden" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
 </div>
 <div class="mt-4">

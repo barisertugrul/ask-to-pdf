@@ -4,38 +4,62 @@
   "description": "This application allows users to upload a PDF and ask questions about its content using OpenAI's language model.",
   "main": "main.js",
   "scripts": {
-    "start": "concurrently \"electron .\" \"python app.py\"",
+    "start": "electron .",
+    "start-both": "concurrently \"electron .\" \"python app.py\"",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "npx tailwindcss -i ./src/styles.css -o ./dist/styles.css --watch"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "PDF",
+    "OpenAI",
+    "Electron",
+    "TailwindCSS",
+    "JavaScript",
+    "Python",
+    "Flask",
+    "Electron-Builder",
+    "LangChain",
+    "PDF-Processing"
+  ],
+  "author": "Barış ERTUĞRUL",
   "license": "ISC",
   "build": {
     "appId": "com.ertyazilim.asktopdf",
     "productName": "Ask To PDF",
     "files": [
-      "dist/**/*",
       "main.js",
       "preload.js",
       "index.html",
       "settings.html",
-      "assets/**/*"
+      "assets/**/*",
+      "app.exe"
     ],
     "directories": {
       "buildResources": "assets"
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        "nsis"
+      ],
+        "icon": "assets/img/icon_256.png"
     },
     "mac": {
-      "target": "dmg"
+      "target": [
+        "dmg",
+        "zip"
+      ],
+        "icon": "assets/img/icon_256.icns"
     },
     "linux": {
-      "target": "AppImage"
+      "target": [
+        "AppImage",
+        "zip"
+      ],
+      "icon": "assets/img/icon_256.png"
     }
   },
   "devDependencies": {
@@ -44,12 +68,15 @@
     "tailwindcss": "^3.4.7"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.19",
     "concurrently": "^8.2.2",
     "dotenv": "^16.0.0",
     "express": "^4.17.1",
     "flask": "^2.0.0",
     "langchain": "^0.0.1",
     "openai": "^0.0.1",
-    "pypdf2": "^1.26.0"
+    "postcss": "^8.4.40",
+    "pypdf2": "^1.26.0",
+    "tree-kill": "^1.2.2"
   }
 }
